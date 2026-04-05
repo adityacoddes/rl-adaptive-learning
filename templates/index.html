@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Coding Tutor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">⚡</span>
+                    <h1>CodeTutor</h1>
+                </div>
+                <p class="tagline">AI-Powered Learning</p>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <span class="stat-label">Current Level</span>
+                    <div class="level-badge" id="levelBadge">
+                        <span class="badge-text">Beginner</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Score</span>
+                    <div class="score-display">
+                        <span class="score-value" id="scoreValue">0</span>
+                        <span class="score-unit">pts</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Mindset</span>
+                    <div class="mindset-display" id="mindsetDisplay">
+                        <span class="mindset-emoji">😐</span>
+                        <span class="mindset-text">Neutral</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Learning Progress</span>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">0%</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-label">Strategy</span>
+                    <div class="strategy-display" id="strategyDisplay">
+                        <span class="strategy-tag">Standby</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="session-stats">
+                <div class="mini-stat">
+                    <span class="mini-label">Questions</span>
+                    <span class="mini-value" id="questionCount">0</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-label">Streak</span>
+                    <span class="mini-value" id="streakValue">0🔥</span>
+                </div>
+            </div>
+
+            <button class="reset-btn" id="resetBtn">
+                <span>🔄 New Session</span>
+            </button>
+        </aside>
+
+        <!-- MAIN CHAT AREA -->
+        <main class="chat-container">
+            <div class="chat-header">
+                <h2>Learning Session</h2>
+                <div class="header-status" id="headerStatus">Ready</div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-container">
+                    <div class="welcome-card">
+                        <h2>Welcome to AI Coding Tutor 🚀</h2>
+                        <p>Ask me anything about programming, debugging, or algorithms. I'll adapt to your learning style!</p>
+                        <div class="welcome-tips">
+                            <div class="tip">
+                                <span class="tip-icon">💡</span>
+                                <p><strong>Ask clearly:</strong> "How do I debug a null pointer exception?"</p>
+                            </div>
+                            <div class="tip">
+                                <span class="tip-icon">🎯</span>
+                                <p><strong>I adapt:</strong> To your level and learning style automatically</p>
+                            </div>
+                            <div class="tip">
+                                <span class="tip-icon">⚡</span>
+                                <p><strong>Learn fast:</strong> With code examples and step-by-step breakdowns</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="userInput" 
+                        placeholder="Ask about Python, Java, debugging, algorithms..." 
+                        class="chat-input"
+                        autocomplete="off"
+                    >
+                    <button id="sendBtn" class="send-button">
+                        <span class="send-icon">➤</span>
+                    </button>
+                </div>
+                <div class="input-hint" id="inputHint">
+                    <span>💬 Ask coding-related questions only</span>
+                </div>
+            </div>
+
+            <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+            </div>
+        </main>
+
+        <!-- RIGHT PANEL (ANALYTICS) -->
+        <aside class="analytics-panel">
+            <div class="analytics-header">
+                <h3>Analytics</h3>
+                <div class="analytics-refresh" id="analyticsRefresh">⟳</div>
+            </div>
+
+            <div class="analytics-content">
+                <div class="chart-container">
+                    <span class="chart-label">Mindset Trend</span>
+                    <div class="mindset-chart" id="mindsetChart">
+                        <div class="chart-bar" style="height: 0%"></div>
+                        <div class="chart-bar" style="height: 0%"></div>
+                        <div class="chart-bar" style="height: 0%"></div>
+                        <div class="chart-bar" style="height: 0%"></div>
+                        <div class="chart-bar" style="height: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="rewards-history">
+                    <span class="chart-label">Rewards</span>
+                    <div class="rewards-list" id="rewardsList">
+                        <span class="empty-state">No rewards yet</span>
+                    </div>
+                </div>
+
+                <div class="insights-box">
+                    <span class="chart-label">Session Insights</span>
+                    <div class="insights-content" id="insightsContent">
+                        <p class="insight-item">Total Questions: <strong id="insightQCount">0</strong></p>
+                        <p class="insight-item">Avg. Reward: <strong id="insightAvgReward">0.0</strong></p>
+                        <p class="insight-item">Best Mindset: <strong id="insightBestMindset">-</strong></p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toast"></div>
+
+    <!-- SCRIPT -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
