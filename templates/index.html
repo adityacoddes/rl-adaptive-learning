@@ -1,181 +1,1193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Coding Tutor</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdaptIQ — Adaptive Learning IDE</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg-0: #0d1117;
+    --bg-1: #161b22;
+    --bg-2: #1c2128;
+    --bg-3: #21262d;
+    --bg-4: #2d333b;
+    --border: #30363d;
+    --text-0: #e6edf3;
+    --text-1: #adbac7;
+    --text-2: #768390;
+    --text-3: #444c56;
+    --accent: #58a6ff;
+    --accent-dim: #1f6feb33;
+    --green: #3fb950;
+    --green-dim: #238636;
+    --yellow: #d29922;
+    --orange: #db6d28;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --pink: #f778ba;
+    --cyan: #39c5cf;
+    --sidebar-w: 48px;
+    --explorer-w: 240px;
+    --panel-h: 200px;
+    --tab-h: 35px;
+    --status-h: 22px;
+    --activity-bg: #010409;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-0);
+    color: var(--text-0);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 13px;
+  }
+
+  /* ── TITLE BAR ── */
+  #titlebar {
+    height: 30px;
+    background: var(--activity-bg);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+    flex-shrink: 0;
+    -webkit-app-region: drag;
+    user-select: none;
+  }
+  .traffic-lights { display: flex; gap: 6px; }
+  .tl { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; transition: filter 0.15s; }
+  .tl:hover { filter: brightness(1.3); }
+  .tl-red { background: #ff5f57; }
+  .tl-yellow { background: #febc2e; }
+  .tl-green { background: #28c840; }
+  #titlebar-menu { display: flex; gap: 2px; margin-left: 8px; }
+  .menu-item {
+    padding: 2px 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    color: var(--text-1);
+    cursor: pointer;
+    border-radius: 3px;
+    -webkit-app-region: no-drag;
+  }
+  .menu-item:hover { background: var(--bg-3); color: var(--text-0); }
+  #titlebar-title {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-2);
+    font-family: 'Outfit', sans-serif;
+  }
+  .title-badge {
+    background: var(--accent);
+    color: #000;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  #main { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── ACTIVITY BAR ── */
+  #activitybar {
+    width: var(--sidebar-w);
+    background: var(--activity-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 0;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    cursor: pointer;
+    border-radius: 6px;
+    position: relative;
+    transition: color 0.15s, background 0.15s;
+    font-size: 18px;
+  }
+  .activity-icon:hover { color: var(--text-0); background: var(--bg-3); }
+  .activity-icon.active { color: var(--text-0); }
+  .activity-icon.active::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 24px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+  .activity-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--accent);
+    color: #000;
+    font-size: 9px;
+    font-weight: 700;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Outfit', sans-serif;
+  }
+  .activity-spacer { flex: 1; }
+  #activitybar .bottom-icons { display: flex; flex-direction: column; gap: 2px; align-items: center; padding-bottom: 4px; }
+
+  /* ── SIDEBAR / EXPLORER ── */
+  #sidebar {
+    width: var(--explorer-w);
+    background: var(--bg-1);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 8px 12px 6px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-1);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-action { color: var(--text-2); cursor: pointer; font-size: 14px; }
+  .sidebar-action:hover { color: var(--text-0); }
+  .sidebar-section { padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .sidebar-section-title {
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .sidebar-section-title:hover { color: var(--text-0); }
+  .tree-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 12px 3px 20px;
+    cursor: pointer;
+    color: var(--text-1);
+    font-size: 12px;
+    border-radius: 0;
+    transition: background 0.1s;
+  }
+  .tree-item:hover { background: var(--bg-3); color: var(--text-0); }
+  .tree-item.active { background: var(--accent-dim); color: var(--accent); }
+  .tree-folder { display: flex; align-items: center; }
+  .tree-folder-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    color: var(--text-1);
+    transition: transform 0.15s;
+    font-size: 10px;
+  }
+  .tree-folder.collapsed .tree-folder-icon { transform: rotate(-90deg); }
+  .tree-folder-children { margin-left: 12px; }
+  .tree-folder-children.collapsed { display: none; }
+
+  /* ── BREADCRUMB / TABS ── */
+  #breadcrumb { 
+    padding: 6px 12px; 
+    background: var(--bg-2); 
+    border-bottom: 1px solid var(--border);
+    display: flex; 
+    gap: 8px; 
+    align-items: center;
+    font-size: 11px; 
+    color: var(--text-2);
+    flex-wrap: wrap;
+  }
+  .bc-sep { color: var(--text-3); }
+  #bc-section { color: var(--text-1); cursor: pointer; }
+  #bc-section:hover { color: var(--accent); }
+  #bc-file { color: var(--accent); font-weight: 600; }
+
+  #tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--bg-2); flex-shrink: 0; overflow-x: auto; }
+  .tab {
+    padding: 6px 12px;
+    border-right: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-2);
+    transition: all 0.15s;
+    white-space: nowrap;
+    position: relative;
+  }
+  .tab:hover { color: var(--text-0); }
+  .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+  .tab.active::before { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--accent); }
+
+  /* ── EDITOR AREA ── */
+  #editor-area { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+  #editor-panel-split { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  #editor-content { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+  #editor-main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+  #line-numbers {
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    padding: 12px 8px;
+    text-align: right;
+    color: var(--text-3);
+    font-size: 12px;
+    line-height: 1.6;
+    user-select: none;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  #line-numbers div { height: 19.2px; }
+
+  #editor-text { flex: 1; padding: 12px; overflow: auto; color: var(--text-1); line-height: 1.6; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  #minimap { width: 48px; background: var(--bg-2); border-left: 1px solid var(--border); padding: 4px 2px; display: none; }
+  .mm-cell { height: 2px; margin-bottom: 1px; background: var(--bg-3); border-radius: 1px; }
+  .mm-line { height: 3px; margin-bottom: 1px; background: var(--bg-3); border-radius: 1px; }
+  .mm-line.full { width: 100%; }
+  .mm-line.med { width: 75%; }
+  .mm-line.short { width: 50%; }
+  .mm-line.accent { background: var(--accent-dim); }
+  .mm-line.green { background: #3fb95033; }
+
+  /* ── PANEL ── */
+  #panel {
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    max-height: var(--panel-h);
+    flex-shrink: 0;
+  }
+
+  #panel-tabs {
+    display: flex;
+    gap: 0;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-tab {
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-2);
+    border-right: 1px solid var(--border);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .panel-tab:hover { color: var(--text-0); background: var(--bg-2); }
+  .panel-tab.active { color: var(--accent); background: var(--bg-2); border-bottom: 2px solid var(--accent); }
+  .panel-spacer { flex: 1; }
+  .panel-action { padding: 6px 12px; cursor: pointer; color: var(--text-2); transition: color 0.15s; }
+  .panel-action:hover { color: var(--text-0); }
+
+  #panel-content { flex: 1; overflow: auto; display: flex; }
+  .panel-section { flex: 1; overflow: auto; display: none; }
+  .panel-section.active { display: flex; }
+
+  /* ── CHAT ── */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .chat-msg {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .chat-msg.user {
+    flex-direction: row-reverse;
+  }
+  .chat-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'Outfit', sans-serif;
+  }
+  .chat-avatar.ai {
+    background: var(--accent);
+    color: #000;
+  }
+  .chat-avatar.user {
+    background: var(--green);
+    color: #000;
+  }
+  .chat-bubble {
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    font-size: 12px;
+    background: var(--bg-3);
+    color: var(--text-0);
+  }
+  .chat-bubble.user {
+    background: var(--accent);
+    color: #000;
+    font-weight: 500;
+  }
+  .chat-bubble.error {
+    background: var(--red);
+    color: #fff;
+  }
+  .chat-bubble h3 {
+    margin: 8px 0 4px 0;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  .chat-bubble.user h3 {
+    color: #000;
+  }
+  .chat-bubble p {
+    margin: 4px 0;
+  }
+  .chat-bubble code {
+    background: var(--bg-1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--cyan);
+  }
+  .chat-bubble.user code {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+  .code-container {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin: 6px 0;
+    overflow: hidden;
+  }
+  .code-container pre {
+    padding: 8px;
+    overflow-x: auto;
+    margin: 0;
+  }
+  .code-container code {
+    color: var(--cyan);
+    font-size: 11px;
+  }
+  .code-container button {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 4px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin: 4px;
+    font-weight: 600;
+    transition: filter 0.15s;
+  }
+  .code-container button:hover { filter: brightness(0.9); }
+
+  .chat-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-2);
+    flex-shrink: 0;
+    align-items: center;
+  }
+  .chat-input {
+    flex: 1;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    color: var(--text-0);
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    transition: border-color 0.15s;
+  }
+  .chat-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-1);
+  }
+  .chat-input::placeholder { color: var(--text-3); }
+  .chat-btn {
+    cursor: pointer;
+    color: var(--text-2);
+    transition: color 0.15s;
+    font-size: 14px;
+  }
+  .chat-btn:hover { color: var(--text-0); }
+  .chat-btn:disabled { color: var(--text-3); cursor: not-allowed; opacity: 0.5; }
+
+  /* ── ADAPTIVE LEARNING METADATA ── */
+  .adaptive-metadata {
+    display: flex;
+    gap: 12px;
+    padding: 6px 12px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    margin: 4px 0;
+    flex-wrap: wrap;
+  }
+  .metadata-item {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .metadata-label {
+    color: var(--text-2);
+    font-weight: 600;
+  }
+  .metadata-value {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .metadata-value.beginner { color: var(--green); }
+  .metadata-value.intermediate { color: var(--yellow); }
+  .metadata-value.advanced { color: var(--orange); }
+  .metadata-value.negative { color: var(--red); }
+  .metadata-value.positive { color: var(--green); }
+
+  /* ── LOADING SPINNER ── */
+  .spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--text-3);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── NOTIFICATIONS ── */
+  .notif-list { padding: 8px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+  .notif-item {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: var(--bg-3);
+    border-radius: 4px;
+    border-left: 3px solid var(--accent);
+  }
+  .notif-icon { font-size: 14px; }
+  .notif-text { color: var(--text-0); font-size: 12px; }
+  .notif-time { color: var(--text-3); font-size: 11px; margin-top: 4px; }
+
+  /* ── STATUS BAR ── */
+  #statusbar {
+    height: var(--status-h);
+    background: var(--bg-1);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    padding: 0 12px;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--text-2);
+  }
+  .status-item { display: flex; gap: 4px; align-items: center; }
+  .status-spacer { flex: 1; }
+
+  /* ── UTILITY BUTTONS ── */
+  button {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    transition: filter 0.15s;
+  }
+  button:hover { filter: brightness(0.9); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.secondary { background: var(--bg-3); color: var(--text-0); }
+
+  /* ── QUIZ TERMINAL ── */
+  .quiz-terminal {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--green);
+    padding: 12px;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--text-3); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-2); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    #sidebar { display: none; }
+    .chat-bubble { max-width: 85%; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <span class="logo-icon">⚡</span>
-                    <h1>CodeTutor</h1>
-                </div>
-                <p class="tagline">AI-Powered Learning</p>
-            </div>
 
-            <div class="stats-panel">
-                <div class="stat-card">
-                    <span class="stat-label">Current Level</span>
-                    <div class="level-badge" id="levelBadge">
-                        <span class="badge-text">Beginner</span>
-                    </div>
-                </div>
+<!-- TITLE BAR -->
+<div id="titlebar">
+  <div class="traffic-lights">
+    <div class="tl tl-red"></div>
+    <div class="tl tl-yellow"></div>
+    <div class="tl tl-green"></div>
+  </div>
+  <div id="titlebar-menu">
+    <div class="menu-item">File</div>
+    <div class="menu-item">Edit</div>
+    <div class="menu-item">View</div>
+    <div class="menu-item">Help</div>
+  </div>
+  <div id="titlebar-title">
+    AdaptIQ — Adaptive Learning IDE
+    <span class="title-badge">Beta</span>
+  </div>
+</div>
 
-                <div class="stat-card">
-                    <span class="stat-label">Score</span>
-                    <div class="score-display">
-                        <span class="score-value" id="scoreValue">0</span>
-                        <span class="score-unit">pts</span>
-                    </div>
-                </div>
+<!-- MAIN CONTAINER -->
+<div id="main">
 
-                <div class="stat-card">
-                    <span class="stat-label">Mindset</span>
-                    <div class="mindset-display" id="mindsetDisplay">
-                        <span class="mindset-emoji">😐</span>
-                        <span class="mindset-text">Neutral</span>
-                    </div>
-                </div>
+  <!-- ACTIVITY BAR -->
+  <div id="activitybar">
+    <div class="activity-icon active" onclick="showView('onboarding')"><i class="fas fa-home"></i></div>
+    <div class="activity-icon" onclick="showView('dashboard')"><i class="fas fa-chart-line"></i></div>
+    <div class="activity-icon" onclick="showView('lesson')"><i class="fas fa-book"></i></div>
+    <div class="activity-icon" onclick="showView('quiz')"><i class="fas fa-clipboard-list"></i></div>
+    <div class="activity-icon" onclick="showView('analytics')"><i class="fas fa-chart-bar"></i></div>
+    <div class="activity-spacer"></div>
+    <div class="bottom-icons">
+      <div class="activity-icon"><i class="fas fa-cog"></i></div>
+    </div>
+  </div>
 
-                <div class="stat-card">
-                    <span class="stat-label">Learning Progress</span>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" id="progressBar">
-                            <div class="progress-fill"></div>
-                        </div>
-                        <span class="progress-text" id="progressText">0%</span>
-                    </div>
-                </div>
+  <!-- SIDEBAR / EXPLORER -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <span>EXPLORER</span>
+      <i class="fas fa-plus sidebar-action"></i>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">
+        <i class="fas fa-folder-open"></i> Open Editors
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">
+        <i class="fas fa-folder-open"></i> Modules
+      </div>
+      <div class="tree-item">📚 Python Basics</div>
+      <div class="tree-item">📚 Data Structures</div>
+      <div class="tree-item active">📚 Probability</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">
+        <i class="fas fa-bookmark"></i> Bookmarks
+      </div>
+    </div>
+  </div>
 
-                <div class="stat-card">
-                    <span class="stat-label">Strategy</span>
-                    <div class="strategy-display" id="strategyDisplay">
-                        <span class="strategy-tag">Standby</span>
-                    </div>
-                </div>
-            </div>
+  <!-- EDITOR AREA -->
+  <div id="editor-area">
 
-            <div class="session-stats">
-                <div class="mini-stat">
-                    <span class="mini-label">Questions</span>
-                    <span class="mini-value" id="questionCount">0</span>
-                </div>
-                <div class="mini-stat">
-                    <span class="mini-label">Streak</span>
-                    <span class="mini-value" id="streakValue">0🔥</span>
-                </div>
-            </div>
-
-            <button class="reset-btn" id="resetBtn">
-                <span>🔄 New Session</span>
-            </button>
-        </aside>
-
-        <!-- MAIN CHAT AREA -->
-        <main class="chat-container">
-            <div class="chat-header">
-                <h2>Learning Session</h2>
-                <div class="header-status" id="headerStatus">Ready</div>
-            </div>
-
-            <div class="chat-messages" id="chatMessages">
-                <div class="welcome-container">
-                    <div class="welcome-card">
-                        <h2>Welcome to AI Coding Tutor 🚀</h2>
-                        <p>Ask me anything about programming, debugging, or algorithms. I'll adapt to your learning style!</p>
-                        <div class="welcome-tips">
-                            <div class="tip">
-                                <span class="tip-icon">💡</span>
-                                <p><strong>Ask clearly:</strong> "How do I debug a null pointer exception?"</p>
-                            </div>
-                            <div class="tip">
-                                <span class="tip-icon">🎯</span>
-                                <p><strong>I adapt:</strong> To your level and learning style automatically</p>
-                            </div>
-                            <div class="tip">
-                                <span class="tip-icon">⚡</span>
-                                <p><strong>Learn fast:</strong> With code examples and step-by-step breakdowns</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="input-area">
-                <div class="input-wrapper">
-                    <input 
-                        type="text" 
-                        id="userInput" 
-                        placeholder="Ask about Python, Java, debugging, algorithms..." 
-                        class="chat-input"
-                        autocomplete="off"
-                    >
-                    <button id="sendBtn" class="send-button">
-                        <span class="send-icon">➤</span>
-                    </button>
-                </div>
-                <div class="input-hint" id="inputHint">
-                    <span>💬 Ask coding-related questions only</span>
-                </div>
-            </div>
-
-            <div class="loading-spinner" id="loadingSpinner" style="display: none;">
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-            </div>
-        </main>
-
-        <!-- RIGHT PANEL (ANALYTICS) -->
-        <aside class="analytics-panel">
-            <div class="analytics-header">
-                <h3>Analytics</h3>
-                <div class="analytics-refresh" id="analyticsRefresh">⟳</div>
-            </div>
-
-            <div class="analytics-content">
-                <div class="chart-container">
-                    <span class="chart-label">Mindset Trend</span>
-                    <div class="mindset-chart" id="mindsetChart">
-                        <div class="chart-bar" style="height: 0%"></div>
-                        <div class="chart-bar" style="height: 0%"></div>
-                        <div class="chart-bar" style="height: 0%"></div>
-                        <div class="chart-bar" style="height: 0%"></div>
-                        <div class="chart-bar" style="height: 0%"></div>
-                    </div>
-                </div>
-
-                <div class="rewards-history">
-                    <span class="chart-label">Rewards</span>
-                    <div class="rewards-list" id="rewardsList">
-                        <span class="empty-state">No rewards yet</span>
-                    </div>
-                </div>
-
-                <div class="insights-box">
-                    <span class="chart-label">Session Insights</span>
-                    <div class="insights-content" id="insightsContent">
-                        <p class="insight-item">Total Questions: <strong id="insightQCount">0</strong></p>
-                        <p class="insight-item">Avg. Reward: <strong id="insightAvgReward">0.0</strong></p>
-                        <p class="insight-item">Best Mindset: <strong id="insightBestMindset">-</strong></p>
-                    </div>
-                </div>
-            </div>
-        </aside>
+    <!-- BREADCRUMB -->
+    <div id="breadcrumb">
+      <span id="bc-section">Modules / Probability</span>
+      <span class="bc-sep">/</span>
+      <span id="bc-file">probability.md</span>
     </div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div class="toast" id="toast"></div>
+    <!-- TABS -->
+    <div id="tabs">
+      <div class="tab active" onclick="showView('onboarding')">Profile Setup</div>
+      <div class="tab" onclick="showView('dashboard')">Dashboard</div>
+      <div class="tab" onclick="showView('lesson')">Lesson</div>
+      <div class="tab" onclick="showView('quiz')">Quiz</div>
+      <div class="tab" onclick="showView('analytics')">Analytics</div>
+    </div>
 
-    <!-- SCRIPT -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- EDITOR PANEL SPLIT -->
+    <div id="editor-panel-split">
+      <div id="editor-content">
+        <div id="editor-main">
+          <div id="line-numbers"></div>
+          <div id="editor-text">
+            <div id="view-onboarding" class="view active">
+              <h2>Welcome to AdaptIQ 🚀</h2>
+              <p>Your personalized AI coding tutor awaits. The system will adapt to your skill level and learning pace.</p>
+              <br>
+              <h3>How to Get Started:</h3>
+              <ul style="margin-left:20px;line-height:2;">
+                <li>Go to the <strong>AI TUTOR</strong> panel below</li>
+                <li>Ask any <strong>coding question</strong> (Python, JavaScript, etc.)</li>
+                <li>The AI will provide tailored explanations</li>
+                <li>The system learns your level and adapts automatically</li>
+              </ul>
+              <br>
+              <h3>Supported Topics:</h3>
+              <ul style="margin-left:20px;line-height:2;">
+                <li>🐍 Python Programming</li>
+                <li>☕ Java & Object-Oriented Design</li>
+                <li>🔧 Debugging & Error Handling</li>
+                <li>📊 Algorithms & Data Structures</li>
+                <li>⚙️ System Design Basics</li>
+              </ul>
+            </div>
+
+            <div id="view-dashboard" class="view">
+              <h2>📊 Your Dashboard</h2>
+              <p>Track your progress and learning stats here.</p>
+              <br>
+              <h3>Quick Stats:</h3>
+              <ul style="margin-left:20px;line-height:2;">
+                <li>🔥 7-Day Streak</li>
+                <li>⭐ 1,240 XP</li>
+                <li>📈 84% Accuracy</li>
+                <li>🎯 15 Topics Mastered</li>
+              </ul>
+            </div>
+
+            <div id="view-lesson" class="view">
+              <h2>📘 Conditional Probability</h2>
+              <p>Understanding probability in dependent events.</p>
+            </div>
+
+            <div id="view-quiz" class="view">
+              <h2>📝 Assessment Quiz</h2>
+              <p>Test your knowledge on recent topics.</p>
+            </div>
+
+            <div id="view-analytics" class="view">
+              <h2>📈 Analytics & Insights</h2>
+              <p>Detailed breakdown of your learning journey.</p>
+            </div>
+          </div>
+        </div>
+        <div id="minimap"></div>
+      </div>
+
+      <!-- PANEL (CHAT) -->
+      <div id="panel">
+        <div id="panel-tabs">
+          <div class="panel-tab active" onclick="switchPanel('chat')" id="ptab-chat">
+            <i class="fas fa-robot"></i> AI TUTOR
+          </div>
+          <div class="panel-tab" onclick="switchPanel('quiz')" id="ptab-quiz">
+            <i class="fas fa-terminal"></i> QUIZ TERMINAL
+          </div>
+          <div class="panel-tab" onclick="switchPanel('notif')" id="ptab-notif">
+            <i class="fas fa-bell"></i> NOTIFICATIONS
+          </div>
+          <div class="panel-spacer"></div>
+          <div class="panel-action"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div id="panel-content">
+
+          <!-- CHAT SECTION -->
+          <div id="pcontent-chat" class="panel-section active">
+            <div class="chat-messages" id="chat-messages">
+              <div class="chat-msg">
+                <div class="chat-avatar ai">AI</div>
+                <div class="chat-bubble">👋 Hi! I'm your AI coding tutor. Ask me anything about <strong>Python, Java, debugging, algorithms,</strong> and more. What would you like to learn today?</div>
+              </div>
+            </div>
+            <div class="chat-input-row">
+              <i class="fas fa-microphone chat-btn"></i>
+              <input 
+                type="text"
+                class="chat-input" 
+                id="chat-input"
+                placeholder="Ask a coding question... (e.g., 'What is Python?')"
+                onkeypress="if(event.key==='Enter') sendMessage()"
+              >
+              <i class="fas fa-image chat-btn"></i>
+              <i 
+                class="fas fa-paper-plane chat-btn" 
+                id="send-btn"
+                style="color:var(--accent);"
+                onclick="sendMessage()"
+              ></i>
+            </div>
+            <!-- Metadata display -->
+            <div id="adaptive-metadata" style="display:none;"></div>
+          </div>
+
+          <!-- QUIZ TERMINAL -->
+          <div id="pcontent-quiz" class="panel-section">
+            <div class="quiz-terminal" id="quiz-content">
+              <span style="color:var(--text-3);">$ </span>adaptiq run --session quiz-001<br>
+              <span style="color:var(--text-2);">✓ Session initialized</span><br>
+              <span style="color:var(--text-2);">✓ Ready for questions</span><br>
+              <span style="color:var(--text-3);">$ _</span>
+            </div>
+          </div>
+
+          <!-- NOTIFICATIONS -->
+          <div id="pcontent-notif" class="panel-section">
+            <div class="notif-list" id="notif-list">
+              <div class="notif-item">
+                <div class="notif-icon">🤖</div>
+                <div><div class="notif-text">AI Tutor is online and ready to help.</div><div class="notif-time">Now</div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div><!-- end editor-panel-split -->
+  </div><!-- end editor-area -->
+</div><!-- end main -->
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div class="status-item"><i class="fas fa-code-branch"></i> main</div>
+  <div class="status-item"><i class="fas fa-sync-alt"></i> Connected</div>
+  <div class="status-item" id="current-section-status">📖 Profile Setup</div>
+  <div class="status-spacer"></div>
+  <div class="status-item" id="adaptive-level">📊 Level: —</div>
+  <div class="status-item" id="adaptive-mindset">🧠 Mindset: —</div>
+  <div class="status-item"><i class="fas fa-robot"></i> AI: Active</div>
+</div>
+
+<script>
+  // ═════════════════════════════════════════════════════════════
+  // ▌ CONFIGURATION
+  // ═════════════════════════════════════════════════════════════
+  const API_BASE_URL = 'http://localhost:5000';
+  const API_TIMEOUT = 30000; // 30 seconds
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ STATE MANAGEMENT
+  // ═════════════════════════════════════════════════════════════
+  
+  const state = {
+    isRequestInFlight: false,
+    chatHistory: [],
+    currentLevel: '—',
+    currentMindset: '—',
+    currentAction: '—',
+  };
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ DOM ELEMENTS CACHE
+  // ═════════════════════════════════════════════════════════════
+  
+  const elements = {
+    chatInput: document.getElementById('chat-input'),
+    sendBtn: document.getElementById('send-btn'),
+    chatMessages: document.getElementById('chat-messages'),
+    adaptiveMetadata: document.getElementById('adaptive-metadata'),
+    statusLevel: document.getElementById('adaptive-level'),
+    statusMindset: document.getElementById('adaptive-mindset'),
+  };
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ MESSAGE RENDERING
+  // ═════════════════════════════════════════════════════════════
+
+  /**
+   * Append a message to the chat
+   * @param {string} message - Message text or HTML
+   * @param {string} sender - 'user' or 'ai'
+   * @param {boolean} isError - Whether this is an error message
+   */
+  function appendChatMessage(message, sender = 'ai', isError = false) {
+    try {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chat-msg ${sender === 'user' ? 'user' : ''}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = `chat-avatar ${sender === 'user' ? 'user' : 'ai'}`;
+      avatar.textContent = sender === 'user' ? 'YOU' : 'AI';
+
+      const bubble = document.createElement('div');
+      bubble.className = `chat-bubble ${sender === 'user' ? 'user' : ''} ${isError ? 'error' : ''}`;
+      
+      // Safely render message content
+      if (sender === 'ai' && !isError) {
+        // AI responses are HTML from backend
+        bubble.innerHTML = message;
+      } else {
+        // User messages and errors are plain text
+        bubble.textContent = message;
+      }
+
+      msgDiv.appendChild(avatar);
+      msgDiv.appendChild(bubble);
+      elements.chatMessages.appendChild(msgDiv);
+
+      // Auto-scroll to bottom
+      elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+    } catch (error) {
+      console.error('Error appending message:', error);
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ ADAPTIVE LEARNING METADATA DISPLAY
+  // ═════════════════════════════════════════════════════════════
+
+  /**
+   * Display adaptive learning metadata
+   * @param {object} data - Backend response data
+   */
+  function displayAdaptiveMetadata(data) {
+    try {
+      state.currentLevel = data?.level ?? '—';
+      state.currentMindset = data?.mindset ?? '—';
+      state.currentAction = data?.action ?? '—';
+      
+      const reward = parseFloat(data?.reward ?? 0);
+      const rewardClass = reward > 0 ? 'positive' : reward < 0 ? 'negative' : '';
+
+      // Update status bar
+      elements.statusLevel.innerHTML = `📊 Level: <span class="metadata-value ${state.currentLevel.toLowerCase()}">${state.currentLevel}</span>`;
+      elements.statusMindset.innerHTML = `🧠 Mindset: <span class="metadata-value">${state.currentMindset}</span>`;
+
+      // Update metadata display
+      elements.adaptiveMetadata.innerHTML = `
+        <div class="metadata-item">
+          <span class="metadata-label">Level:</span>
+          <span class="metadata-value ${state.currentLevel.toLowerCase()}">${state.currentLevel}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Mindset:</span>
+          <span class="metadata-value">${state.currentMindset}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Strategy:</span>
+          <span class="metadata-value">${state.currentAction}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Reward:</span>
+          <span class="metadata-value ${rewardClass}">${reward > 0 ? '+' : ''}${reward.toFixed(2)}</span>
+        </div>
+      `;
+      elements.adaptiveMetadata.style.display = 'block';
+    } catch (error) {
+      console.error('Error displaying metadata:', error);
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ API COMMUNICATION WITH ERROR HANDLING
+  // ═════════════════════════════════════════════════════════════
+
+  /**
+   * Send message to backend API with comprehensive error handling
+   * @param {string} userMessage - User's input message
+   */
+  async function callBackendAPI(userMessage) {
+    try {
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+
+      const response = await fetch(`${API_BASE_URL}/step`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: userMessage }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // Handle HTTP error responses
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      // Parse response JSON
+      const data = await response.json();
+
+      // Validate response structure
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response format from server');
+      }
+
+      return data;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout (30 seconds). Please check your connection and try again.');
+      } else if (error instanceof TypeError) {
+        throw new Error('Network error. Is the backend running? (http://localhost:5000)');
+      } else if (error instanceof SyntaxError) {
+        throw new Error('Invalid JSON response from server');
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ MESSAGE SENDING
+  // ═════════════════════════════════════════════════════════════
+
+  /**
+   * Main send message function with validation and error handling
+   */
+  async function sendMessage() {
+    try {
+      const userMessage = elements.chatInput?.value?.trim() ?? '';
+
+      // Validation: empty message
+      if (!userMessage) {
+        appendChatMessage('⚠️ Please type a message first.', 'ai', true);
+        return;
+      }
+
+      // Validation: prevent duplicate requests
+      if (state.isRequestInFlight) {
+        appendChatMessage('⏳ Please wait for the current response...', 'ai', true);
+        return;
+      }
+
+      // Add user message to chat
+      appendChatMessage(userMessage, 'user');
+
+      // Clear input and disable button
+      elements.chatInput.value = '';
+      setButtonState(true);
+      state.isRequestInFlight = true;
+
+      // Show loading indicator
+      appendChatMessage('🔄 Analyzing your question...', 'ai');
+
+      // Call backend API
+      const response = await callBackendAPI(userMessage);
+
+      // Remove loading message
+      if (elements.chatMessages.lastChild) {
+        elements.chatMessages.removeChild(elements.chatMessages.lastChild);
+      }
+
+      // Handle blocked responses (non-coding queries)
+      if (response.action === 'blocked') {
+        appendChatMessage(response.ai_feedback ?? '🚫 This question is outside my scope. Please ask coding-related questions.', 'ai', true);
+        return;
+      }
+
+      // Display AI response
+      const aiFeedback = response.ai_feedback ?? '(No response from AI)';
+      appendChatMessage(aiFeedback, 'ai');
+
+      // Display adaptive learning metadata
+      displayAdaptiveMetadata(response);
+
+    } catch (error) {
+      // Remove loading message
+      if (elements.chatMessages.lastChild?.textContent?.includes('Analyzing')) {
+        elements.chatMessages.removeChild(elements.chatMessages.lastChild);
+      }
+
+      // Display error message
+      const errorMessage = error?.message ?? 'An unexpected error occurred. Please try again.';
+      console.error('API Error:', error);
+      appendChatMessage(`❌ ${errorMessage}`, 'ai', true);
+
+    } finally {
+      // Re-enable button
+      setButtonState(false);
+      state.isRequestInFlight = false;
+      elements.chatInput?.focus();
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ UI UTILITIES
+  // ═════════════════════════════════════════════════════════════
+
+  /**
+   * Set send button state
+   * @param {boolean} isLoading - Whether request is in progress
+   */
+  function setButtonState(isLoading) {
+    if (!elements.sendBtn) return;
+    
+    if (isLoading) {
+      elements.sendBtn.style.opacity = '0.5';
+      elements.sendBtn.style.pointerEvents = 'none';
+      elements.sendBtn.innerHTML = '<span class="spinner"></span>';
+    } else {
+      elements.sendBtn.style.opacity = '1';
+      elements.sendBtn.style.pointerEvents = 'auto';
+      elements.sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+  }
+
+  /**
+   * Copy code to clipboard
+   * @param {HTMLElement} button - Copy button element
+   */
+  function copyCode(button) {
+    try {
+      const codeBlock = button?.previousElementSibling?.querySelector('code');
+      if (!codeBlock) return;
+
+      const text = codeBlock.textContent || codeBlock.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = button.textContent;
+        button.textContent = '✓ Copied!';
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 2000);
+      });
+    } catch (error) {
+      console.error('Copy error:', error);
+      alert('Failed to copy code');
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ VIEW MANAGEMENT
+  // ═════════════════════════════════════════════════════════════
+
+  const viewMeta = {
+    onboarding: { section: 'Profile', file: 'profile_setup.md', status: '📖 Profile Setup' },
+    dashboard:  { section: 'Dashboard', file: 'dashboard.jsx', status: '📊 Dashboard' },
+    lesson:     { section: 'Modules / Probability', file: 'probability.md', status: '📘 Lesson' },
+    quiz:       { section: 'Assessments', file: 'assessment.quiz', status: '📝 Quiz Active' },
+    analytics:  { section: 'Analytics', file: 'analytics.json', status: '📈 Analytics' },
+  };
+
+  /**
+   * Show a specific view
+   * @param {string} id - View ID
+   */
+  function showView(id) {
+    try {
+      document.querySelectorAll('.view').forEach(v => v?.classList.remove('active'));
+      document.getElementById('view-' + id)?.classList.add('active');
+
+      document.querySelectorAll('.tab').forEach(t => t?.classList.remove('active'));
+      const tabMap = { onboarding:0, dashboard:1, lesson:2, quiz:3, analytics:4 };
+      document.querySelectorAll('.tab')[tabMap[id]]?.classList.add('active');
+
+      document.querySelectorAll('.activity-icon').forEach((ic, i) => {
+        ic?.classList.remove('active');
+        if (i === tabMap[id]) ic?.classList.add('active');
+      });
+
+      const m = viewMeta[id];
+      if (m) {
+        const bcSection = document.getElementById('bc-section');
+        const bcFile = document.getElementById('bc-file');
+        const statusEl = document.getElementById('current-section-status');
+        if (bcSection) bcSection.textContent = m.section;
+        if (bcFile) bcFile.textContent = m.file;
+        if (statusEl) statusEl.textContent = m.status;
+      }
+    } catch (error) {
+      console.error('Error showing view:', error);
+    }
+  }
+
+  /**
+   * Switch panel tab
+   * @param {string} id - Panel ID
+   */
+  function switchPanel(id) {
+    try {
+      document.querySelectorAll('.panel-section').forEach(p => p?.style?.setProperty('display', 'none'));
+      document.querySelectorAll('.panel-tab').forEach(t => t?.classList.remove('active'));
+      
+      const panelContent = document.getElementById('pcontent-' + id);
+      const panelTab = document.getElementById('ptab-' + id);
+      
+      if (panelContent) panelContent.style.display = 'flex';
+      if (panelTab) panelTab.classList.add('active');
+    } catch (error) {
+      console.error('Error switching panel:', error);
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════
+  // ▌ INITIALIZATION
+  // ═════════════════════════════════════════════════════════════
+
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      // Generate line numbers
+      const ln = document.getElementById('line-numbers');
+      if (ln) {
+        for (let i = 1; i <= 80; i++) {
+          const div = document.createElement('div');
+          div.textContent = i;
+          ln.appendChild(div);
+        }
+      }
+
+      // Focus chat input
+      elements.chatInput?.focus();
+
+      console.log('✓ AdaptIQ Frontend initialized');
+    } catch (error) {
+      console.error('Initialization error:', error);
+    }
+  });
+</script>
+
 </body>
 </html>
