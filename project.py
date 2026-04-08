@@ -3,12 +3,13 @@ from flask_cors import CORS
 import requests
 import re
 import random
+import os
 
 app = Flask(__name__)
 CORS(app)
 
 # 🔐 API KEY (PUT YOUR KEY HERE)
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 # =========================
 # 🧠 ENV STATE
