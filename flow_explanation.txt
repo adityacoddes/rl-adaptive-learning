@@ -1,0 +1,103 @@
+FLOW EXPLANATION
+================
+
+How the System Works
+
+1. User Opens the Website
+   - You open adaptive_learning_ide_improved.html in your browser
+   - You see a nice IDE-like interface with a chat panel at the bottom
+   - There's a text input field where you can type your question
+
+2. User Asks a Question
+   - You type something like "What is a loop in Python?"
+   - You press Enter or click the send button
+   - The input field clears and a loading spinner appears
+
+3. Frontend Validates the Question
+   - Before sending to the backend, the frontend checks if you wrote anything
+   - It also prevents you from sending multiple requests at once (stops spam)
+   - This happens instantly on your computer - no waiting
+
+4. Question Gets Sent to Backend
+   - The frontend sends your message to the Flask server running on port 5000
+   - It includes your text in JSON format: {"action": "your question"}
+   - The message travels over the network to the backend
+
+5. Backend Checks the Question Type
+   - The backend has a function called is_coding_related() that scans your question
+   - It looks for keywords like "Python", "loop", "function", "code", etc
+   - If it finds coding-related words, it continues
+   - If not, it sends back a blocked response immediately
+
+6. Backend Detects Your Skill Level
+   - The backend analyzes what you wrote
+   - detect_level() checks if you said things like "don't know", "maybe", or "I think"
+   - It assigns you a level: beginner, intermediate, or advanced
+   - This helps the AI give answers at the right difficulty
+
+7. Backend Detects Your Emotional State
+   - detect_mindset() looks at your question for emotional clues
+   - If you wrote "don't understand" or "confused", it marks you as confused
+   - If you wrote "wrong" or "again", it marks you as frustrated
+   - If you wrote "easy" or "got it", it marks you as confident
+   - These signals help the AI choose how to explain things
+
+8. Reinforcement Learning Picks a Teaching Strategy
+   - The backend has a Q-table that learns from past interactions
+   - Based on your level and emotional state, it picks one of 4 strategies:
+     * simple_explanation - explain like you're 5
+     * deep_explanation - give all the details
+     * motivation - be encouraging, give hints
+     * increase_difficulty - challenge you with advanced examples
+   - This isn't hardcoded - it learns which strategy works best over time
+
+9. Backend Creates a Prompt for the AI
+   - It builds a message for the LLM that includes:
+     * Your question
+     * Your detected level
+     * Your detected emotional state
+     * The chosen teaching strategy
+   - The prompt tells the AI to structure its response in a specific way
+
+10. AI (Claude/GPT) Generates the Answer
+    - The prompt gets sent to OpenRouter API (which connects to real LLMs)
+    - The AI reads your question and the teaching strategy
+    - It generates a detailed response with explanations, code examples, and tips
+    - This takes a few seconds because it's thinking
+
+11. Response Comes Back to Frontend
+    - The backend receives the AI response
+    - It packages everything together: the explanation, your level, your mindset, etc
+    - It sends back JSON with fields like:
+      * ai_feedback: the actual answer (as HTML)
+      * level: beginner/intermediate/advanced
+      * mindset: curious/confused/frustrated/etc
+      * action: which strategy was used
+      * reward: a score showing if this was good (0.5 means neutral, 2 means excellent)
+
+12. Backend Updates Its Learning
+    - Before sending the response back, the backend runs update_q()
+    - This updates the Q-table based on how the strategy performed
+    - If your next message shows you're now confident, it rewards that strategy
+    - If you're still confused, it might try a different approach next time
+
+13. Frontend Displays the Response
+    - The JavaScript removes the loading spinner
+    - Your message appears in a green bubble (user)
+    - The AI response appears in a blue bubble (AI)
+    - Any code blocks are formatted nicely with a copy button
+    - At the bottom, it shows your level, mindset, strategy, and reward
+
+14. Status Bar Updates
+    - The bottom of the screen updates to show:
+      * Your current level (beginner/intermediate/advanced)
+      * Your current mindset (curious/confused/frustrated/etc)
+    - This gives you feedback on what the system detected
+
+15. You Can Ask Another Question
+    - The chat stays open and ready for the next question
+    - The AI remembers what level and state you're in
+    - It uses that info to tailor the next response
+    - The Q-table keeps learning with each interaction
+
+That's basically the whole flow. The key thing is that instead of hardcoding "if beginner then explain simply", the system learns over time which teaching methods work best for different situations.

@@ -1,0 +1,322 @@
+DEMO STEPS
+==========
+
+How to Test the Project
+
+SETUP (Do This First)
+
+1. Download the files
+   - You should have: app.py (backend), adaptive_learning_ide_improved.html (frontend)
+   - Put them in the same folder
+
+2. Install Python packages
+   - Open terminal in your project folder
+   - Run: pip install flask flask-cors requests
+   - Wait for packages to install
+
+3. Get an OpenRouter API key
+   - Go to https://openrouter.ai/
+   - Sign up for free account
+   - Copy your API key
+   - Open app.py and paste it in the OPENROUTER_API_KEY line
+   - Save the file
+
+4. Start the backend
+   - In terminal, run: python3 app.py
+   - You should see: "Running on http://localhost:5000"
+   - Leave this terminal open
+
+5. Start a web server
+   - Open a NEW terminal window
+   - Run: python3 -m http.server 8000
+   - You should see: "Serving HTTP on 0.0.0.0 port 8000"
+   - Leave this terminal open too
+
+6. Open the website
+   - Open your browser
+   - Go to: http://localhost:8000/adaptive_learning_ide_improved.html
+   - You should see the IDE interface with chat at the bottom
+
+BASIC TEST (5 minutes)
+
+This tests if everything is connected and working.
+
+Step 1: Send a Simple Question
+   - Click in the chat input at the bottom
+   - Type: "What is Python?"
+   - Press Enter or click the send button
+   - You should see:
+     * Your message in a green bubble
+     * A spinner (loading indicator)
+     * After a few seconds: AI response in a blue bubble
+     * Level/mindset information appears
+
+Step 2: Try a Different Topic
+   - Type: "How do loops work?"
+   - Press Enter
+   - Wait for response
+   - Check if the explanation is different from the first one
+
+Step 3: Try a Non-Coding Question
+   - Type: "What's your favorite movie?"
+   - Press Enter
+   - You should get blocked with a red message saying "coding queries only"
+   - This proves the filtering works
+
+If all three worked: GOOD! The system is connected.
+
+ADAPTIVE LEARNING TEST (10 minutes)
+
+This tests if the system detects your level and emotional state.
+
+Step 1: Show You're a Beginner
+   - Type: "I don't understand what a variable is"
+   - Press Enter
+   - Watch the response - it should be very simple and basic
+   - Look at the status bar - should say "Level: beginner"
+
+Step 2: Ask a Follow-up
+   - Type: "Can you explain it again?"
+   - Press Enter
+   - The system might use a different strategy this time
+   - Status bar might still show beginner
+
+Step 3: Show You Understand
+   - Type: "Oh got it! A variable stores data. Easy!"
+   - Press Enter
+   - The system should detect you're now confident
+   - Next response might assume you know the basics
+
+Step 4: Ask Something More Advanced
+   - Type: "How do I make variables work together in functions?"
+   - Press Enter
+   - The system should give a more advanced explanation
+   - Level might change to intermediate
+
+If the responses got progressively more complex: WORKING!
+
+REINFORCEMENT LEARNING TEST (15 minutes)
+
+This tests if the system learns which strategies work.
+
+Background: The system tries 4 teaching approaches:
+- simple_explanation: Very basic
+- deep_explanation: Lots of detail
+- motivation: Encouraging and helpful hints
+- increase_difficulty: Advanced challenges
+
+Step 1: Ask About a Complex Topic
+   - Type: "I'm confused about recursion"
+   - Press Enter
+   - Note which strategy is shown in the metadata
+   - Look at the explanation
+
+Step 2: Ask the Same Thing Again
+   - Type: "Can you explain recursion differently?"
+   - Press Enter
+   - Check if it used a different strategy
+   - The system should try to learn what works for you
+
+Step 3: Indicate Success
+   - Type: "That makes sense! Recursion is when a function calls itself"
+   - Press Enter
+   - The system should reward that strategy
+   - Future similar questions might use it
+
+Step 4: Test with a Different Topic
+   - Type: "I don't understand polymorphism either"
+   - Press Enter
+   - See if it uses a strategy similar to what worked for recursion
+   - This shows the system is learning
+
+If strategies changed and improved: LEARNING IS WORKING!
+
+ERROR HANDLING TEST (10 minutes)
+
+This tests if the system handles problems gracefully.
+
+Test 1: Stop the Backend
+   - Close the Flask terminal (ctrl+c)
+   - Try to send a message: "What is a class?"
+   - You should get an error message: "Network error. Is the backend running?"
+   - The app doesn't crash, button is still clickable
+   - Restart Flask: python3 app.py
+   - Try again - should work now
+   - PASSED if no crash occurred
+
+Test 2: Send Empty Message
+   - Click send with nothing in the input
+   - You should see: "⚠️ Please type a message first"
+   - PASSED if no network request was made
+
+Test 3: Rapid Clicking
+   - Type: "What is a loop?"
+   - Click send multiple times really fast
+   - It should only send once (or give "please wait" messages)
+   - PASSED if no duplicate messages appear
+
+Test 4: Long Response
+   - Type: "Explain how sorting algorithms work in detail"
+   - Wait for a long response
+   - It should display without breaking
+   - Code blocks should format nicely
+   - Try to copy a code block with the copy button
+   - PASSED if everything displays and copy works
+
+Test 5: Invalid API Key
+   - In app.py, change the API key to something random
+   - Restart Flask
+   - Try to ask a question
+   - You should get an error about API key
+   - Change it back and restart
+   - PASSED if error was clear and app survived
+
+FEATURE SHOWCASE (10 minutes)
+
+Demo these cool features to show what the system does.
+
+Feature 1: Automatic Level Detection
+   - "I'm just starting to learn programming"
+   - vs
+   - "I already know Python, teach me about design patterns"
+   - Show how explanations adjust
+
+Feature 2: Emotional State Detection
+   - "I'm really confused about inheritance"
+   - Notice how response is encouraging
+   - vs
+   - "This is easy, give me something harder"
+   - Notice how response includes challenges
+
+Feature 3: Code Examples
+   - "Show me how to write a function"
+   - System includes code blocks with syntax highlighting
+   - Click copy button to copy code
+   - Paste into text editor to show it works
+
+Feature 4: Teaching Strategies
+   - Ask a question and look at the metadata
+   - It might say "simple_explanation" or "motivation"
+   - This is the strategy the system chose
+   - Next similar question might use different strategy
+
+Feature 5: Multiple Topics
+   - Ask about loops
+   - Then ask about functions
+   - Then ask about classes
+   - Show how the system stays helpful across topics
+
+PERFORMANCE TEST (5 minutes)
+
+Test how fast the system responds.
+
+Step 1: Time a Simple Question
+   - Type: "What is Python?" and note the time
+   - Count seconds until response appears
+   - Should be under 15 seconds typically
+
+Step 2: Time a Complex Question
+   - Type: "Explain how hash tables work internally"
+   - Time it
+   - Should still be under 30 seconds
+
+Step 3: Multiple Questions
+   - Send 5 questions in a row
+   - Check that no responses are missing
+   - PASSED if all 5 get answers
+
+EDGE CASES (Optional, but Impressive)
+
+These show you've thought through weird situations.
+
+Edge Case 1: Really Long Question
+   - Copy paste a very long code snippet or question (500+ characters)
+   - System should handle it without breaking
+
+Edge Case 2: Special Characters
+   - Type: "What about arrays? [a, b, c] {key: value}"
+   - System should handle brackets and braces
+
+Edge Case 3: Multiple Languages
+   - "What's a loop in Python vs Java?"
+   - System should handle multiple language names
+
+Edge Case 4: Emoji
+   - "What's a variable? 🤔"
+   - System should not break
+
+WHAT TO SHOW JUDGES
+
+When demonstrating to someone:
+
+1. Show them the interface (cool IDE look)
+2. Send a beginner question (they see simple response)
+3. Send an advanced question (they see complex response)
+4. Show emotional detection ("I don't understand..." gets encouraging response)
+5. Show error handling (try to send empty message, graceful error)
+6. Show code examples (copy button works)
+7. Explain the RL part (system learns which strategies work)
+
+Total time: 10-15 minutes to show everything works.
+
+TIMING FOR PRESENTATION
+
+If you have 5 minutes:
+- Setup and ask 3 questions (beginner, advanced, blocked)
+- Show metadata changes
+- That's it
+
+If you have 10 minutes:
+- Setup
+- Ask 5 questions showing different levels
+- Show error handling (send empty, or stop backend briefly)
+- Explain what's happening behind the scenes
+
+If you have 15 minutes:
+- Setup
+- Multiple questions showing adaptation
+- Error handling demo
+- Code example with copy button
+- Explain architecture: frontend → backend → LLM → response
+- Talk about the RL learning
+
+If you have 20+ minutes:
+- Do everything above
+- Show the code (architecture is clean)
+- Explain how RL Q-table works
+- Talk about future improvements
+- Let them ask questions and answer live
+
+HELPFUL TIPS
+
+- Have your phone handy to take a video if it works really well
+- Keep terminals open so they can see the logs
+- Have the API key ready to paste if needed
+- Test everything before demo day
+- Practice the explanation a few times
+- Have fallback questions ready if something doesn't work
+- Don't stress - even if one thing breaks, everything else still works
+
+TROUBLESHOOTING DURING DEMO
+
+If response is slow:
+- "Sometimes the AI service is busy, let me try again"
+- Send a simpler question
+
+If backend crashes:
+- "Let me restart the server" (quick restart)
+- It only takes a few seconds
+
+If API key is invalid:
+- "Oh, I need to update this key"
+- Quickly swap it out
+- Restart backend
+- Try again
+
+If nothing works:
+- Show the code instead
+- Explain what it does
+- Talk about the architecture
+- You can still win without a live demo if the concept is solid
+
+The judges understand that live demos can be finicky. What matters is that you understand your own project deeply and can explain it clearly.

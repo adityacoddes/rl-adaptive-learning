@@ -1,0 +1,82 @@
+FEATURES
+========
+
+Core Features
+
+- Detects coding-related questions and blocks non-coding queries
+- Analyzes your skill level from your question (beginner/intermediate/advanced)
+- Detects your emotional state (confused/frustrated/confident/curious)
+- Uses reinforcement learning to choose the best teaching strategy for you
+- Generates AI explanations tailored to your level
+- Shows you the adaptive learning metadata (level, mindset, strategy used)
+- Renders code blocks with a copy button for easy use
+- Handles errors gracefully without crashing
+
+Frontend Features
+
+- IDE-like interface with editor, sidebar, and chat panel
+- Real-time loading spinner while waiting for AI response
+- Prevents accidentally sending the same question twice
+- Auto-clears input field after sending
+- Chat scrolls automatically to show latest messages
+- Different colors for user messages (green) vs AI (blue)
+- Error messages appear in red with explanations
+- Status bar shows your current level and mindset
+- Works on desktop and mobile devices
+
+Backend Features
+
+- Flask server handles all API calls
+- Validates questions before processing
+- Extracts meaningful signals from your text
+- Q-learning table learns which strategies work best
+- Calculates rewards to track if explanations helped
+- Calls OpenRouter API to access real LLMs
+- Returns well-structured JSON responses
+
+Error Handling
+
+- Network timeout after 30 seconds with clear message
+- Connection errors show helpful troubleshooting info
+- Invalid API responses don't break the interface
+- Missing backend detected and reported
+- Duplicate requests prevented with in-flight flag
+- Empty inputs caught before sending to backend
+- Malformed JSON handled gracefully
+
+Integration Features
+
+- Frontend and backend communicate over HTTP/JSON
+- CORS enabled so requests work across localhost
+- Request validation on both sides
+- Timeout protection prevents hanging
+- Chat history maintained in browser during session
+- Metadata updated in real-time as you interact
+
+User Experience
+
+- First message explains how to use the system
+- Feedback shows which level/strategy was detected
+- Explanations include step-by-step breakdowns when helpful
+- Code examples included when relevant
+- Encouragement given when detected as frustrated
+- Challenges given when detected as confident
+- Natural conversation flow in chat format
+- No weird pauses or frozen interface
+
+Performance
+
+- Requests sent and received in under 30 seconds
+- UI is responsive and doesn't lag
+- No memory leaks from repeated interactions
+- Handles long responses without issues
+- Chat scrolling is smooth
+- Button clicks work instantly
+
+Security
+
+- User input is sanitized (no XSS attacks)
+- API key stored in backend, not exposed
+- Input length checked to prevent spam
+- Error messages don't leak system info
+- No sensitive data shown in responses

@@ -1,0 +1,140 @@
+AI USAGE
+========
+
+What Role Does AI Play?
+
+The system uses AI in two ways:
+
+1. GENERATING EXPLANATIONS
+   - When you ask a question, the system sends it to an LLM (like Claude or GPT)
+   - The AI generates a detailed explanation tailored to your level
+   - Instead of having pre-written answers for every possible question, we let the AI handle it
+   - This means the system can answer anything coding-related, not just a fixed list
+
+Why AI Instead of Pre-Written Answers?
+   - If we hardcoded responses, we'd need thousands of answers for every topic
+   - Students ask in different ways - some say "What is a loop?" and others ask "How do I repeat code?"
+   - Pre-written answers would be rigid and boring
+   - The AI can adjust its explanation based on your skill level without us writing multiple versions
+   - New coding topics come out all the time - AI can handle them without code changes
+
+2. LEARNING HOW TO TEACH BETTER (Reinforcement Learning)
+   - The backend tracks which teaching strategies work best
+   - It has a simple Q-table (reinforcement learning model) that learns from interactions
+   - When you seem to understand (switch from "confused" to "confident"), the Q-table rewards that strategy
+   - If you stay confused, it tries a different approach next time
+
+Why Not Just Use Fixed Rules?
+   - You could write rules like "if beginner then use simple_explanation"
+   - But different students learn differently
+   - Some beginners respond better to motivation, others to deep explanations
+   - With RL, the system discovers what works best by trying different things
+   - It's not perfect (Q-learning is pretty basic), but it's better than hardcoded rules
+
+PRACTICAL EXAMPLE:
+
+Scenario: Student is confused about loops
+
+Interaction 1:
+- Student: "I don't understand loops"
+- System detects: confused, beginner
+- System picks: simple_explanation strategy
+- AI gives: Very basic explanation
+- Next message shows student is still confused
+- System rewards: 0 (didn't help)
+
+Interaction 2:
+- Student: "Can you try explaining loops differently?"
+- System detects: still confused, beginner
+- System picks: motivation strategy (learned it works better for this case)
+- AI gives: Explanation with analogy + encouragement
+- Next message shows student understood
+- System rewards: 2 (this worked!)
+
+Interaction 3:
+- New student, also confused about loops
+- System picks: motivation strategy (because Q-table remembers it worked)
+- AI explains with analogy and encouragement right away
+- Student understands faster
+
+This is much smarter than just always using "simple_explanation" for all beginners.
+
+WHAT THE AI ACTUALLY DOES:
+
+1. Generate Explanations
+   - Read your question
+   - Consider your skill level and emotional state
+   - Write an explanation that matches that
+   - Include code examples if helpful
+   - Suggest next steps or optimization tips
+   - Format nicely with sections
+
+2. NOT Grading or Assessing You
+   - The system doesn't judge if your answer is right or wrong
+   - It just detects emotional cues from your messages
+   - "confused" means you said "don't understand"
+   - "frustrated" means you said "wrong" or "again"
+   - This is just pattern matching, not deep understanding
+
+3. NOT Personalizing Based on Previous Conversations
+   - Each question is treated fairly independently
+   - The system only remembers your current level/mindset during this session
+   - It doesn't build a profile of your learning style over weeks
+   - That would be cool but it's beyond what we built
+
+WHY NOT USE CHEAPER/SIMPLER ALTERNATIVES?
+
+Could you do this without an LLM?
+   - You could use a search engine + knowledge base
+   - But then you're limited to pre-written content
+   - You'd miss the adaptation to skill level
+   - The explanation wouldn't be as natural
+
+Could you do this with just rule-based teaching?
+   - You could hardcode: "if loop then show this explanation"
+   - But students ask questions in infinite ways
+   - Rules would be brittle and hard to maintain
+   - It would feel robotic and boring
+
+Could the AI alone be enough without RL?
+   - Yes, technically the AI could just answer every question
+   - But it wouldn't improve over time
+   - It wouldn't discover what teaching methods work best
+   - The RL part is what makes it adaptive
+
+THE LIMITATIONS:
+
+1. AI Can Make Mistakes
+   - The LLM sometimes generates incorrect code
+   - We have a filter for coding-related questions, but not correctness
+   - A human still needs to verify important information
+
+2. RL Is Simple
+   - We use basic Q-learning, not deep learning
+   - It only learns from the current session
+   - It takes many interactions to see improvement
+
+3. Emotional Detection Is Basic
+   - We just look for keywords like "confused", "easy", "frustrated"
+   - We don't actually understand your emotions
+   - A more advanced system would use NLP or sentiment analysis
+
+4. No Long-Term Learning
+   - The Q-table resets every time you close the browser
+   - A real adaptive system would save learning across sessions
+   - We didn't implement that because it's more complex
+
+THE BOTTOM LINE:
+
+We use AI because:
+1. It can generate natural explanations for any coding question
+2. It can adjust those explanations based on your skill level
+3. Combined with reinforcement learning, the system improves over time
+4. It's more flexible and scalable than hardcoded solutions
+
+We use Reinforcement Learning because:
+1. Instead of humans deciding how to teach, the system learns what works
+2. Different students respond to different approaches
+3. It allows the system to adapt to feedback (when you understand or get frustrated)
+
+Together, they create a system that feels like it has a student tutor who learns your style and adjusts how they explain things. Not perfect, but way better than a static help page or FAQ.
