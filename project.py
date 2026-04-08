@@ -266,3 +266,6 @@ Clear and detailed explanation.
 ## Code Example
 ```python
 # code here
+
+if name == "main":
+app.run(debug=True)
