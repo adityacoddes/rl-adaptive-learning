@@ -1,14 +1,19 @@
+import os
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import requests
 import re
 import random
-import os
+from dotenv import load_dotenv
+
+load_dotenv() # Loads the .env file you uploaded!
 
 app = Flask(__name__)
 CORS(app)
 
-# 🔐 API KEY (PUT YOUR KEY HERE)
+# =========================
+# 🔐 API KEY (SECURED)
+# =========================
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 # =========================
@@ -53,7 +58,8 @@ def is_coding_related(message):
         "code", "python", "java", "c++", "program",
         "loop", "function", "error", "bug",
         "array", "string", "variable", "debug",
-        "algorithm", "syntax"
+        "algorithm", "syntax", "data science", 
+        "machine learning", "ai", "model", "analysis"
     ]
 
     return any(word in msg for word in keywords)
@@ -147,20 +153,14 @@ def call_llm(prompt):
         if "choices" in result:
             return result["choices"][0]["message"]["content"]
         else:
-            return f"AI Error: {result}"
+            return "Sorry, I couldn't generate a proper response. Please try again."
 
     except Exception as e:
         return f"AI Exception: {str(e)}"
 
 # =========================
-# 🔥 FORMAT RESPONSE → HTML
+# 🔥 FORMAT RESPONSE → HTML (Duplicate fixed)
 # =========================
-def format_response(text):
-    html = text
-
-    # Headings
-    html = re.sub(r"## (.*?)\n", r"<h3>\1</h3>", html)
-
 def format_response(text):
     html = text
 
@@ -172,6 +172,9 @@ def format_response(text):
 
     for code in code_blocks:
         clean_code = code.strip()
+        
+        if clean_code.startswith("python"):
+            clean_code = clean_code[6:].strip()
 
         code_html = f"""
         <div class="code-container">
@@ -187,19 +190,17 @@ def format_response(text):
     return html
 
 # =========================
-# 🔄 RESET ENVIRONMENT
+# 🔄 RESET ENVIRONMENT (NEW FIX FOR HACKATHON)
 # =========================
 @app.route('/reset', methods=['POST'])
 def reset():
-    # 1. Reset your environment state variables here
-    global env 
+    global env
     env = {
         "score": 0,
         "level": "beginner",
         "last_mindset": "neutral"
     }
     
-    # 2. Return whatever JSON response the hackathon documentation requires
     return jsonify({
         "status": "success",
         "message": "Environment reset successfully"
@@ -220,7 +221,7 @@ def step():
             "ai_feedback": """
 <h3>🚫 Coding Queries Only</h3>
 <p>I am designed to help with <b>coding and programming problems</b>.</p>
-<p>Please ask questions related to Python, Java, debugging, algorithms, etc.</p>
+<p>Please ask questions related to Python, Java, Data Science, algorithms, etc.</p>
 """,
             "level": "NA",
             "mindset": "NA",
@@ -244,9 +245,9 @@ def step():
 
     strategy = strategy_map[action]
 
-    # PROMPT
+    # PROMPT (Indentation fixed)
     prompt = f"""
-You are an AI Coding Tutor like ChatGPT.
+You are an AI Coding Tutor.
 
 User Level: {level}
 User Mindset: {mindset}
@@ -257,48 +258,11 @@ User Input:
 Teaching Strategy:
 {strategy}
 
-Give a detailed response.
+Respond STRICTLY in this format. You must include all the headings starting with '##':
 
-FORMAT:
-
-Detailed explanation
+## Explanation
+Clear and detailed explanation.
 
 ## Code Example
-(use triple backticks)
-
-## Step-by-Step
-Explain code
-
-## Optimization
-Better approach
-
-## Extra Tip
-(optional)
-"""
-
-    ai_raw = call_llm(prompt)
-
-    # RL update
-    next_mindset = detect_mindset(user_input)
-    reward = get_reward(env["last_mindset"], next_mindset)
-
-    next_state = f"{level}_{next_mindset}"
-    update_q(state, action, reward, next_state)
-
-    env["last_mindset"] = next_mindset
-
-    ai_feedback = format_response(ai_raw)
-
-    return jsonify({
-        "ai_feedback": ai_feedback,
-        "level": level,
-        "mindset": mindset,
-        "action": action,
-        "reward": reward
-    })
-
-# =========================
-# 🚀 RUN
-# =========================
-if __name__ == "__main__":
-    app.run(debug=True)
+```python
+# code here
