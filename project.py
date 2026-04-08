@@ -187,6 +187,25 @@ def format_response(text):
     return html
 
 # =========================
+# 🔄 RESET ENVIRONMENT
+# =========================
+@app.route('/reset', methods=['POST'])
+def reset():
+    # 1. Reset your environment state variables here
+    global env 
+    env = {
+        "score": 0,
+        "level": "beginner",
+        "last_mindset": "neutral"
+    }
+    
+    # 2. Return whatever JSON response the hackathon documentation requires
+    return jsonify({
+        "status": "success",
+        "message": "Environment reset successfully"
+    }), 200
+
+# =========================
 # 🎮 MAIN CHAT (FINAL 🔥)
 # =========================
 @app.route('/step', methods=['POST'])
